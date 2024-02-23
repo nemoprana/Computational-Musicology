@@ -1,6 +1,7 @@
 ---
-title: "Title"
-author: "Nemo"
+title: "Exploring SAAN"
+subtitle: "Comparing the self-image to the raw data"
+author: "Nemo Woudenberg"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
@@ -11,28 +12,56 @@ output:
 library(flexdashboard)
 library(tidyverse)
 library(spotifyr)
+library(plotly)
 ```
 
-Column {data-width=650}
------------------------------------------------------------------------
+An introduction to the data
+====================================
 
-### Chart A
+## Column
+
+### Introduction
+
+#### Welcome to my portfolio! 
+
+Here I will be comparing some interesting data. On the one hand we have one side of the data:
+
+ - My dad has 19 total songs on spotify: 11 songs played with the band 'Mad Stream' and 8 more songs with the band 'Sleepers Awake At Night'. These two bands consist of mostly the same musicians and have (in my opinion) a very similar sound. 
+
+I want to use the songs of these two bands to have some fun and make an interesting comparison with another part of the data:
+
+ - The band 'Sleepers Awake At Night' (from now on I will refer to them as SAAN, also when SAANs music is mentioned I actually mean the music of SAAN + Mad Stream ) has a public playlist on their spotify profile called 'radio SAAN'. The playlist consists of 94 songs and features some SAAN and Mad Stream songs, but most of the music is from different bands. 
+
+The purpose of this playlist is to give the listener some music that is kind of like the music of SAAN, or maybe has been an inspiration for the band members. My research will therefore try to look at the next question:
+
+Does SAAN sound like they think they do?
+
+By comparing the playlist with their own songs we might get some insight into the kinds of things the members of SAAN listen to in the music they appreciate. For example: we might find that most of the songs in the radio SAAN playlist have a high score on valence. If the songs made by SAAN also tend to have a high valence, we could conclude that they appreciate a good mood! In [The first data] we will look at some introductory visualizations exploring some characteristics of SAANs music.
+
+
+The first data {data-navmenu="First Datas"}
+====================================
+
+## Graph {data-width="800"}
+
+### First chart
 
 ```{r}
 
+SAAN <- get_playlist_audio_features("", "2eBYBIoOoB3AIKyGvbVo3R")
+
+gg_temp_val <- ggplot(SAAN, aes(tempo, valence, color = track.album.name)) +
+  geom_point() +
+  theme_minimal() +
+  labs(x = "Tempo", y = "Valence", color = "Album") 
+
+ggplotly(gg_temp_val)
 ```
 
-Column {data-width=350}
------------------------------------------------------------------------
+## Text {data-widtth="200"}
 
-### Chart B
+### A small conclusion
 
-```{r}
+The graph here on the left show us a quick overview of the valence and tempo of all the SAAN songs. We notice something interesting for the valence values: most of the songs score above 0.5, but 4 of them eek out below from under 0.3! And the low-valence songs are from different albums, so its not like they had an emo phase... We will have to look further into this!
 
-```
-
-### Chart C
-
-```{r}
-
-```
+The tempo values are pretty much smeared out, even though 125 bpm is preferably avoided. 
