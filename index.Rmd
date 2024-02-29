@@ -13,16 +13,18 @@ library(flexdashboard)
 library(tidyverse)
 library(spotifyr)
 library(plotly)
+library(compmus)
 ```
 
 An introduction to the data
 ====================================
+## Empty {data-width="100"}
 
-## Column
+## Column {data-width="800"}
 
 ### Introduction
 
-#### Welcome to my portfolio! 
+#### ALL NEW INFORMATION IS ON THE [Spectogram] PAGE!!
 
 Here I will be comparing some interesting data. On the one hand we have one side of the data:
 
@@ -38,16 +40,16 @@ Does SAAN sound like they think they do?
 
 By comparing the playlist with their own songs we might get some insight into the kinds of things the members of SAAN listen to in the music they appreciate. For example: we might find that most of the songs in the radio SAAN playlist have a high score on valence. If the songs made by SAAN also tend to have a high valence, we could conclude that they appreciate a good mood! In [The first data] we will look at some introductory visualizations exploring some characteristics of SAANs music.
 
+## Empty {data-width="100"}
 
 The first data {data-navmenu="First Datas"}
 ====================================
 
-## Graph {data-width="800"}
+## Graph {data-width="700"}
 
 ### First chart
 
 ```{r}
-
 SAAN <- get_playlist_audio_features("", "2eBYBIoOoB3AIKyGvbVo3R")
 
 gg_temp_val <- ggplot(SAAN, aes(tempo, valence, color = track.album.name)) +
@@ -58,10 +60,87 @@ gg_temp_val <- ggplot(SAAN, aes(tempo, valence, color = track.album.name)) +
 ggplotly(gg_temp_val)
 ```
 
-## Text {data-widtth="200"}
+## Text {data-width="300"}
 
 ### A small conclusion
 
 The graph here on the left show us a quick overview of the valence and tempo of all the SAAN songs. We notice something interesting for the valence values: most of the songs score above 0.5, but 4 of them eek out below from under 0.3! And the low-valence songs are from different albums, so its not like they had an emo phase... We will have to look further into this!
 
 The tempo values are pretty much smeared out, even though 125 bpm is preferably avoided. 
+
+Spectogram {data-navmenu="First Datas" data-orientation=rows}
+====================================
+## Text {data-height="300"}
+
+### Time for a spectogram!
+
+Below here are two visualizations for the song 'Just You and Me'. In [The first data] this was the song with the lowest valence and an high tempo compared to the other low-valence songs (on the bottom-right).
+
+Interesting to note in the timbre is that c05 actually roughly indicates where the voice enters! Bright yellow means there is voice present and the darker regions show absence of voice. The pitch on the other hand show us a very different distribution of colors. This gives us a good clue as to where the different sections in the song are. The part from ~60s until ~100s show us an interesting thing: the yellow parts on C# and F# are actually quite clearly what the guitar is playing. Because there is not too much harmonic information the lines are very distinct!
+
+## Graph {data-height="700"}
+
+### Timbre
+
+```{r}
+yandm <-
+  get_tidy_audio_analysis("1e7FgxUJ8WAdbVMrpaFpsE") |> # Change URI.
+  compmus_align(bars, segments) |>                     # Change `bars`
+  select(bars) |>                                      #   in all three
+  unnest(bars) |>                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+          compmus_summarise, pitches,
+          method = "max", norm = "chebyshev"              # Change summary & norm.
+      )
+  ) |>
+  mutate(
+    timbre =
+      map(segments,
+          compmus_summarise, timbre,
+          method = "max", norm = "chebyshev"              # Change summary & norm.
+      )
+  )
+
+yandm|>
+  compmus_gather_timbre() |>
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  scale_fill_viridis_c() +                              
+  theme_classic()
+```
+
+### Pitch
+
+```{r}
+you_and_me <-
+  get_tidy_audio_analysis("1e7FgxUJ8WAdbVMrpaFpsE") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+
+you_and_me |>
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
+  compmus_gather_chroma() |> 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  theme_minimal() +
+  scale_fill_viridis_c()
+```
