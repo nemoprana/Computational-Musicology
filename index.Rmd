@@ -24,7 +24,7 @@ An introduction to the data
 
 ### Introduction
 
-#### ALL NEW INFORMATION IS ON [The chordogram!] PAGE!!
+#### ALL NEW INFORMATION IS ON THE [Novelty Function] PAGE!!
 
 Here I will be comparing some interesting data. On the one hand we have one side of the data:
 
@@ -296,3 +296,54 @@ tpf |>
   theme_minimal() +
   labs(x = "Time (s)", y = "")
 ```
+
+Novelty Function {data-navmenu="First Datas"}
+====================================
+## Text {data-width="300"}
+
+### What is going on?
+Here is a novelty graph for the song '20point50'. The song actually starts around 11 seconds, the beginning is filled with "electric secrets" (their words, not mine!). This is actually very visible in the novelty graph, where at around 11 seconds there is a huge spike in novelty! After this The novelty stays pretty much constant, and in the next page ([Tempogram])we will see what the bpm is for this song.
+
+
+## Graph {data-width="700"}
+
+### Graph
+```{r}
+twpf <-
+  get_tidy_audio_analysis("1yVIMaoLkTQkqhghCiTrNy") |>
+  select(segments) |>
+  unnest(segments)
+
+twpf |>
+  mutate(loudness_max_time = start + loudness_max_time) |>
+  arrange(loudness_max_time) |>
+  mutate(delta_loudness = loudness_max - lag(loudness_max)) |>
+  ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
+  geom_line() +
+  xlim(0, 30) +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Novelty")
+```
+
+Tempogram {data-navmenu="First Datas"}
+====================================
+
+## Graph {data-width="700"}
+
+### Graph
+```{r}
+tempo <- get_tidy_audio_analysis("1yVIMaoLkTQkqhghCiTrNy")
+
+tempo |>
+  tempogram(window_size = 8, hop_size = 3, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+```
+
+## Text {data-width="300"}
+
+### BPM
+As seen before in the [Novelty Function], the tempogram also shows that the first few seconds of the song are different from the rest. After the intro the actual song starts and the tempo stays constant. All the music repetoire of SAAN is based around guitar looping, so it is no surprise to see that the tempo stays so constant, as the underlying music is quite literally repeating (they do switch sections where the tempo could change, but in this song that is not the case.) At around 100 BPM the tempogram shows the same tempo I concluded as well as the tempo spotify concluded.
