@@ -14,6 +14,9 @@ library(tidyverse)
 library(spotifyr)
 library(plotly)
 library(compmus)
+library(tidymodels)
+library(ggdendro)
+library(heatmaply)
 ```
 
 An introduction to the data
@@ -24,7 +27,7 @@ An introduction to the data
 
 ### Introduction
 
-#### ALL NEW INFORMATION IS ON THE [Novelty Function] PAGE!!
+#### ALL NEW INFORMATION IS ON THE [Heatmap + dendogram] PAGE!!
 
 Here I will be comparing some interesting data. On the one hand we have one side of the data:
 
@@ -347,3 +350,90 @@ tempo |>
 
 ### BPM
 As seen before in the [Novelty Function], the tempogram also shows that the first few seconds of the song are different from the rest. After the intro the actual song starts and the tempo stays constant. All the music repetoire of SAAN is based around guitar looping, so it is no surprise to see that the tempo stays so constant, as the underlying music is quite literally repeating (they do switch sections where the tempo could change, but in this song that is not the case.) At around 100 BPM the tempogram shows the same tempo I concluded as well as the tempo spotify concluded.
+
+Heatmap + dendogram {data-navmenu="First Datas" data-orientation=rows}
+====================================
+
+## Graph {data-height="700"}
+
+### Heatmap
+```{r}
+saan_playlist_mix <-
+  get_playlist_audio_features("", "3nvA3PkdTXtslrzxlWF3MA") |>
+  add_audio_analysis() |>
+  mutate(
+    segments = map2(segments, key, compmus_c_transpose),
+    pitches =
+      map(segments,
+          compmus_summarise, pitches,
+          method = "mean", norm = "manhattan"
+      ),
+    timbre =
+      map(
+        segments,
+        compmus_summarise, timbre,
+        method = "mean"
+      )
+  ) |>
+  mutate(pitches = map(pitches, compmus_normalise, "clr")) |>
+  mutate_at(vars(pitches, timbre), map, bind_rows) |>
+  unnest(cols = c(pitches, timbre))
+
+halloween_juice <-
+  recipe(
+    track.name ~
+      ##danceability +
+      energy +
+      loudness +
+      speechiness +
+      ##acousticness +
+      instrumentalness +
+      ##liveness +
+      valence +
+      tempo +
+      ##duration +
+      #C + `C#|Db` + D + `D#|Eb` +
+      #E + `F` + `F#|Gb` + G +
+      #`G#|Ab` + A + `A#|Bb` + B +
+      c01 + c02 + c03 + c04 + c05 + c06 #+
+      #c07 + c08 + c09 + c10 + c11 + c12#,
+      ,
+    data = saan_playlist_mix
+  ) |>
+  step_center(all_predictors()) |>
+  step_scale(all_predictors()) |> 
+  # step_range(all_predictors()) |> 
+  prep(saan_playlist_mix |> mutate(track.name = str_trunc(track.name, 20))) |>
+  juice() |>
+  column_to_rownames("track.name")
+
+halloween_dist <- dist(halloween_juice, method = "euclidean")
+
+#halloween_dist |> 
+#  hclust(method = "complete") |> # Try single, average, and complete.
+#  dendro_data() |>
+#  ggdendrogram()
+
+heatmaply(
+  halloween_juice,
+  hclustfun = hclust,
+  hclust_method = "average",  # Change for single, average, or complete linkage.
+  dist_method = "euclidean"
+)
+```
+
+### Dendogram
+```{r}
+halloween_dist |> 
+  hclust(method = "complete") |> # Try single, average, and complete.
+  dendro_data() |>
+  ggdendrogram()
+```
+
+## Text {data-height="300"}
+
+### Look at that!
+The dendogram speaks! The original question I had was if the SAAN songs aligned with the songs from the 'radio SAAN' playlist. Now that we have a way to see if the songs fall within a classification we can test this :). 
+For this visualisation I made a smaller playlist consisting of 6 SAAN songs and 13 other songs from the radio playlist. The six songs are: 
+20point50, Perfect Balance, Saanosphere, Words are no Use, Let it Rain, Don't Let Go. 
+As we can see in the dendogram (and the heatmap), these songs are not really put into the same categories. More like they are very spread out! I don't want to make assumptions just from this data, but it looks like the music of SAAN is quite similar (for these specific values) to the music of the playlist. 
