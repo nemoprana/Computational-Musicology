@@ -4,6 +4,7 @@ subtitle: "Comparing the self-image to the raw data"
 author: "Nemo Woudenberg"
 output: 
   flexdashboard::flex_dashboard:
+    theme: flatly
     orientation: columns
     vertical_layout: fill
 ---
@@ -17,69 +18,344 @@ library(compmus)
 library(tidymodels)
 library(ggdendro)
 library(heatmaply)
+thematic::thematic_rmd()
 ```
 
-An introduction to the data
-====================================
+
+
+
+# Introduction
+
 ## Empty {data-width="100"}
 
 ## Column {data-width="800"}
 
 ### Introduction
 
-#### ALL NEW INFORMATION IS ON THE [Heatmap + dendogram] PAGE!!
-
 Here I will be comparing some interesting data. On the one hand we have one side of the data:
 
- - My dad has 19 total songs on spotify: 11 songs played with the band 'Mad Stream' and 8 more songs with the band 'Sleepers Awake At Night'. These two bands consist of mostly the same musicians and have (in my opinion) a very similar sound. 
+-   My dad has 19 total songs on spotify: 11 songs played with the band 'Mad Stream' and 8 more songs with the band 'Sleepers Awake At Night'. These two bands consist of mostly the same musicians and have (in my opinion) a very similar sound.
 
 I want to use the songs of these two bands to have some fun and make an interesting comparison with another part of the data:
 
- - The band 'Sleepers Awake At Night' (from now on I will refer to them as SAAN, also when SAANs music is mentioned I actually mean the music of SAAN + Mad Stream ) has a public playlist on their spotify profile called 'radio SAAN'. The playlist consists of 94 songs and features some SAAN and Mad Stream songs, but most of the music is from different bands. 
+-   The band 'Sleepers Awake At Night' has a public playlist on their spotify profile called 'radio SAAN'. The playlist consists of 94 songs and features some SAAN and Mad Stream songs, but most of the music is from different bands. (From here on out I will refer to the repertoire of SAAN and Mad Stream simply by naming SAAN)
 
-The purpose of this playlist is to give the listener some music that is kind of like the music of SAAN, or maybe has been an inspiration for the band members. My research will therefore try to look at the next question:
+The purpose of this playlist is to give the listener some music that is kind of like the music of SAAN, or that maybe has been an inspiration for the band members. My research will therefore try to look at the next question:
 
 Does SAAN sound like they think they do?
 
-By comparing the playlist with their own songs we might get some insight into the kinds of things the members of SAAN listen to in the music they appreciate. For example: we might find that most of the songs in the radio SAAN playlist have a high score on valence. If the songs made by SAAN also tend to have a high valence, we could conclude that they appreciate a good mood! In [The first data] we will look at some introductory visualizations exploring some characteristics of SAANs music.
+By comparing the playlist with their own songs we might get some insight into the kinds of things the members of SAAN listen for in the music they appreciate. For example: we might find that most of the songs in the radio SAAN playlist have a high score on valence. If the songs made by SAAN also tend to have a high valence, we could conclude that they appreciate a good mood!
+
+For this project I made a playlist containing all the SAAN + Mad Stream songs and another playlist where I copied the radio SAAN playlist and removed all the SAAN and Mad Stream songs (called [SAAN](https://open.spotify.com/playlist/2eBYBIoOoB3AIKyGvbVo3R?si=d42c6f630fb54fe1) and [Radio](https://open.spotify.com/playlist/0Hq8raqKuU0Ln6Df5l2uym?si=f4c36a19d757472e) respectively). 
+
+This portfolio is divided into multiple sections:
+
+[First comparisons](#valence---tempo)
+
+Here we will look at a few simple track-level features provided to us by the spotify API, plotted out in the same way for the SAAN songs and the radio playlist. This will be great to look into some easy data and to forge some early conclusions. The different pages are:
+
+- [Valence - tempo]
+- [Energy - loudness]
+- [Instrumentalness - speechiness]
+- [Time signature]
+
+[Zoom in on tracks](#you-and-me)
+
+Here we will look at some specific tracks from the playlists. We use these tracks to visualize some more specific audio features, and to see if there is a trend with the different playlists. The pages are:
+  
+- [You and me]
+- [20point50]
+- [Brave Captain]
+
+[Final comparison](#abc)
+
+This is the page where we will really work towards a final answer. We will compare the two playlists as a whole and see if Spotify can find a difference. The pages are:
+
+- [Timbre](#abc)
+- [Classification]
+
+[Conclusion]
+
+Here we make a little final conclusion.
+
 
 ## Empty {data-width="100"}
 
-The first data {data-navmenu="First Datas"}
-====================================
+
+
+
+
+# Valence - tempo {#valence---tempo data-navmenu="First comparisons"}
 
 ## Graph {data-width="700"}
 
-### First chart
+### Valence - tempo -- SAAN
 
 ```{r}
 SAAN <- get_playlist_audio_features("", "2eBYBIoOoB3AIKyGvbVo3R")
 
-gg_temp_val <- ggplot(SAAN, aes(tempo, valence, color = track.album.name)) +
+gg_temp_val <- ggplot(SAAN, aes(tempo, valence, color = track.name)) +
   geom_point() +
   theme_minimal() +
-  labs(x = "Tempo", y = "Valence", color = "Album") 
+  labs(x = "Tempo", y = "Valence", color = "Album") +
+  theme(legend.position = "none") +
+  xlim(60, 180) +
+  ylim(0, 1)
 
 ggplotly(gg_temp_val)
 ```
 
 ## Text {data-width="300"}
 
-### A small conclusion
+### SAAN
 
-The graph here on the left show us a quick overview of the valence and tempo of all the SAAN songs. We notice something interesting for the valence values: most of the songs score above 0.5, but 4 of them eek out below from under 0.3! And the low-valence songs are from different albums, so its not like they had an emo phase... We will have to look further into this!
+Go to [Radio](#vt-radio)
 
-The tempo values are pretty much smeared out, even though 125 bpm is preferably avoided. 
+Here on the left we compare the valence and tempo of the playlists (use the link above to switch between the two). 
 
-Spectogram {data-navmenu="First Datas" data-orientation=rows}
-====================================
+There seems to be no real correlation between valence and tempo. Both playlists show a wide coverage of both variables, with maybe a bit of emphasis on high valence? Either way, we will have to keep exploring!
+
+[To the next page](#energy---loudness)
+
+The SAAN songs do show a gap in valence between 0.3 and 0.5. Also there are no songs with a bpm around 125, which is actually the most comfortable tempo for humans to tap along to! Is this coincidence? I think so... But it is interesting to note.
+
+
+
+
+# VT radio {#vt-radio .hidden data-navmenu="First comparisons"}
+
+## Graph {data-width="700"}
+
+### Valence - tempo -- Radio
+
+```{r}
+radio <- get_playlist_audio_features("", "0Hq8raqKuU0Ln6Df5l2uym")
+
+gg_temp_val <- ggplot(radio, aes(tempo, valence, color = track.name)) +
+  geom_point() +
+  theme_minimal() +
+  labs(x = "Tempo", y = "Valence", color = "Album") +
+  theme(legend.position = "none") +
+  xlim(60, 180) +
+  ylim(0, 1)
+
+ggplotly(gg_temp_val)
+```
+
+## Text {data-width="300"}
+
+### Radio
+
+Go to [SAAN](#valence---tempo)
+
+Here on the left we compare the valence and tempo of the playlists (use the link above to switch between the two). 
+
+There seems to be no real correlation between valence and tempo. Both playlists show a wide coverage of both variables, with maybe a bit of emphasis on high valence? Either way, we will have to keep exploring!
+
+[To the next page](#energy---loudness)
+
+If you hover over (or zoom in on) bpm = 171 and valence = 0.76 you will find two songs, Brave Captain and So What'Cha Want, that have almost exactly the same values! There are two more places where this happens, see if you can find them! 
+
+
+
+# Energy - loudness {#energy---loudness data-navmenu="First comparisons"}
+
+## Graph {data-width="700"}
+
+### Energy - loudness -- SAAN
+
+```{r}
+gg_temp_val <- ggplot(SAAN, aes(loudness, energy, color = track.name)) +
+  geom_point() +
+  theme_minimal() +
+  labs(x = "Loudness", y = "Energy", color = "Track") +
+  theme(legend.position = "none") +
+  xlim(-15, 0) +
+  ylim(0, 1)
+
+ggplotly(gg_temp_val)
+```
+
+## Text {data-width="300"}
+
+### SAAN
+
+Go to [Radio](#el-radio)
+
+There seems to be a clear correlation between energy and loudness! This is especially visible for the SAAN songs. Also, both playlists seem to consist of mainly high (above 0.5) energy songs. The SAAN songs cap out on about -7.5db of loudness however, where the Radio playlists seems to contain some louder music.
+
+
+
+[To the next page](#instrumentalness---speechiness)
+
+
+
+# EL radio {#el-radio .hidden data-navmenu="First comparisons"}
+
+## Graph {data-width="700"}
+
+### Energy - loudness -- Radio
+
+```{r}
+gg_temp_val <- ggplot(radio, aes(loudness, energy, color = track.name)) +
+  geom_point() +
+  theme_minimal() +
+  labs(x = "Loudness", y = "Energy", color = "Track") +
+  theme(legend.position = "none") +
+  xlim(-15, 0) +
+  ylim(0, 1)
+
+ggplotly(gg_temp_val)
+```
+
+## Text {data-width="300"}
+
+### Radio
+
+Go to [SAAN](#energy---loudness)
+
+There seems to be a clear correlation between energy and loudness! This is especially visible for the SAAN songs. Also, both playlists seem to consist of mainly high (above 0.5) energy songs. The SAAN songs cap out on about -7.5db of loudness however, where the Radio playlists seems to contain some louder music.
+
+[To the next page](#instrumentalness---speechiness)
+
+
+
+# Instrumentalness - speechiness {#instrumentalness---speechiness data-navmenu="First comparisons"}
+
+## Graph {data-width="700"}
+
+### Instrumentalness - speechiness - SAAN
+
+```{r}
+gg_temp_val <- ggplot(SAAN, aes(instrumentalness, speechiness, color = track.name)) +
+  geom_point() +
+  theme_minimal() +
+  labs(x = "Instrumentalness", y = "Speechiness", color = "Track") +
+  theme(legend.position = "none") +
+  xlim(0, 1) +
+  ylim(0, 1)
+
+ggplotly(gg_temp_val)
+```
+
+## Text {data-width="300"}
+
+### SAAN
+
+Go to [Radio](#is-radio)
+
+The main conclusion here: its music with lyrics! Low instrumentalness basically means that there is voice on the recording; low speechiness means it is most likely music with instruments. And almost all songs have both :) The radio playlist does seem to have more instrumental tracks. 
+
+[To the next page](#time-signature)
+
+The song Just Ask Larry (highest instrumentalness) has only talk-like singing and is an exception in that aspect to the other songs.
+
+
+
+
+# IS radio {#is-radio .hidden data-navmenu="First comparisons"}
+
+## Graph {data-width="700"}
+
+### Instrumentalness - speechiness - Radio
+
+```{r}
+gg_temp_val <- ggplot(radio, aes(instrumentalness, speechiness, color = track.name)) +
+  geom_point() +
+  theme_minimal() +
+  labs(x = "Instrumentalness", y = "Speechiness", color = "Track") +
+  theme(legend.position = "none") +
+  xlim(0, 1) +
+  ylim(0, 1)
+
+ggplotly(gg_temp_val)
+```
+
+## Text {data-width="300"}
+
+### Radio
+
+Go to [SAAN](#instrumentalness---speechiness)
+
+The main conclusion here: its music with lyrics! Low instrumentalness basically means that there is voice on the recording; low speechiness means it is most likely music with instruments. And almost all songs have both :) The radio playlist does seem to have more instrumental tracks. 
+
+[To the next page](#time-signature)
+
+
+# Time signature {#time-signature data-navmenu="First comparisons"}
+
+## Graph {data-width="700"}
+
+### Time signature - SAAN
+
+```{r}
+gg_temp_val <- ggplot(SAAN, aes(time_signature, fill = track.name)) +
+  geom_bar() +
+  theme_minimal() +
+  #labs(x = "Instrumentalness", y = "Speechiness", color = "Track") +
+  theme(legend.position = "none") +
+  xlim(2, 5) 
+  #ylim(0, 1)
+
+ggplotly(gg_temp_val)
+```
+
+## Text {data-width="300"}
+
+### SAAN
+
+Go to [Radio](#ts-radio)
+
+This might seem like a bit of a useless page, but it actually tells us a bit! Namely: all the songs have a time signature of 4/4. While most western music is music in 4/4, there are genres and styles where different time signatures are common (jazz and classical for example). By showing that all songs are 4/4 we have found another similarity!
+
+From here on out we will zoom in on some specific tracks.
+
+[To the next page](#you-and-me)
+
+# TS radio {#ts-radio .hidden data-navmenu="First comparisons"}
+
+## Graph {data-width="700"}
+
+### Time signature - Radio
+
+```{r}
+gg_temp_val <- ggplot(radio, aes(time_signature, fill = track.name)) +
+  geom_bar() +
+  theme_minimal() +
+  #labs(x = "Instrumentalness", y = "Speechiness", color = "Track") +
+  theme(legend.position = "none") +
+  xlim(2, 5) 
+#ylim(0, 1)
+
+ggplotly(gg_temp_val)
+```
+
+## Text {data-width="300"}
+
+### Radio
+
+Go to [SAAN](#time-signature)
+
+This might seem like a bit of a useless page, but it actually tells us a bit! Namely: all the songs have a time signature of 4/4. While most western music is music in 4/4, there are genres and styles where different time signatures are common (jazz and classical for example). By showing that all songs are 4/4 we have found another similarity!
+
+From here on out we will zoom in on some specific tracks.
+
+[To the next page](#you-and-me)
+
+# You and me {data-navmenu="Zoom in on tracks" data-orientation="rows"}
+
 ## Text {data-height="300"}
 
-### Time for a spectogram!
+### Just You and Me
 
-Below here are two visualizations for the song 'Just You and Me'. In [The first data] this was the song with the lowest valence and an high tempo compared to the other low-valence songs (on the bottom-right).
 
-Interesting to note in the timbre is that c05 actually roughly indicates where the voice enters! Bright yellow means there is voice present and the darker regions show absence of voice. The pitch on the other hand show us a very different distribution of colors. This gives us a good clue as to where the different sections in the song are. The part from ~60s until ~100s show us an interesting thing: the yellow parts on C# and F# are actually quite clearly what the guitar is playing. Because there is not too much harmonic information the lines are very distinct!
+Down here are two features of the Mad Stream song 'Just You and Me'. In [First comparisons] this was the song with the lowest valence and a high tempo compared to the other low-valence songs (on the bottom-right).
+
+On the left we have timbre: noticeable here is that timbre c05 shows us where the song contains singing. Some parts are instrumental only, and there c05 is lower. Apparently the singers voice (kind of) occupies the space of c05.
+
+On the right there are chroma features: this shows us how much of a specific note is heard on a specific time. We see one part of the song where the notes Bb and Eb re most dominant, followed up by a part where Gb and Db are dominant. After these parts the clear colors fade and the spectrum is kind of smeared. This might be because of all the percussion in this part. 
+
+[Next page](#tpf)
 
 ## Graph {data-height="700"}
 
@@ -148,10 +424,65 @@ you_and_me |>
   scale_fill_viridis_c()
 ```
 
-The chordogram! {data-navmenu="First Datas"}
-====================================
+# 20point50 {#tpf data-navmenu="Zoom in on tracks" data-orientation="rows"}
 
-## Graph {data-width="500"}
+## Text {data-height="300"}
+
+### 20point50 self-similairity and chordogram
+
+Show [Novelty and keygram](#tpff)
+
+Here we look at the song '20point50'. I specifically chose this song to zoom in to because the b-part of the song is basically just a big F7 chord. 
+
+On the right here we can see just that! This 'chordogram' shows us which chords sound most prominent in the different sections. If you click on the link above you can see the keygram, which shows us kind of the same developments but with less emphasis on chords and more on structure. 
+
+On the left we see (if we're stil on the keygram page) a novelty function. This functions shows us how much new information is given at a specific time and is used to determine the tempo of the song. The first ~10 seconds of this song don't really have a tempo and are filled with 'electric secrets' (their words, not mine!). The novelty function shows this by giving us a big peak around second 11 where the music and rythm actually start. This is also seen clearly in the self-similarity matrix. 
+
+[Next page](#brave-captain)
+
+
+## Graph {data-height="700"}
+
+### Self similairity
+
+```{r}
+lir <-
+  get_tidy_audio_analysis("1yVIMaoLkTQkqhghCiTrNy") |> # Change URI.
+  compmus_align(bars, segments) |>                     # Change `bars`
+  select(bars) |>                                      #   in all three
+  unnest(bars) |>                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+          compmus_summarise, pitches,
+          method = "mean", norm = "manhattan"              # Change summary & norm.
+      )
+  ) |>
+  mutate(
+    timbre =
+      map(segments,
+          compmus_summarise, timbre,
+          method = "mean", norm = "manhattan"              # Change summary & norm.
+      )
+  )
+
+lir |>
+  compmus_self_similarity(timbre, "cosine") |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "", y = "")
+```
 
 ### Chordogram
 
@@ -269,48 +600,28 @@ tpf |>
   labs(x = "Time (s)", y = "")
 ```
 
-## Text {data-width="500"}
+# 20p50 {#tpff data-navmenu="Zoom in on tracks" data-orientation="rows" .hidden}
 
-### What to see
+## Text {data-height="300"}
 
-Here on the left is a chordogram for the song called 20point50! This one is very interesting and I will tell you why. This song (and most music in the corpus) is quite vampy (which means that the song just hangs around one chord / harmony instead of going all different hamonic places). This means that the keygram I made for this song actually shows very little matter of interest (check it out on the [Keygram] page!). When I tried making a chordogram, initially it didn't really work out until I sorted on sections. Now here you can really see what is going on! 
+### Novelty and keygram
 
-Most of the song is based around a C7 vamp (actually more based on a riff but that is not really important), however there are the little sections in between where the band basically just straight up sings a big fat F7 chord. The chordogram really shows this and it turned out great!
+Show [Self-similairity and chordogram](#tpf)
 
-Keygram {data-navmenu="First Datas"}
-====================================
+Here we look at the song '20point50'. I specifically chose this song to zoom in to because the b-part of the song is basically just a big F7 chord. 
 
-## Graph {data-width="700"}
+On the right here we can see just that! This 'chordogram' shows us which chords sound most prominent in the different sections. If you click on the link above you can see the keygram, which shows us kind of the same developments but with less emphasis on chords and more on structure. 
 
-### Chordogram
+On the left we see (if we're stil on the keygram page) a novelty function. This functions shows us how much new information is given at a specific time and is used to determine the tempo of the song. The first ~10 seconds of this song don't really have a tempo and are filled with 'electric secrets' (their words, not mine!). The novelty function shows this by giving us a big peak around second 11 where the music and rythm actually start. This is also seen clearly in the self-similarity matrix. 
 
-```{r}
-tpf |> 
-  compmus_match_pitch_template(
-    key_templates,         # Change to chord_templates if descired
-    method = "euclidean",  # Try different distance metrics
-    norm = "manhattan"     # Try different norms
-  ) |>
-  ggplot(
-    aes(x = start + duration / 2, width = duration, y = name, fill = d)
-  ) +
-  geom_tile() +
-  scale_fill_viridis_c(guide = "none") +
-  theme_minimal() +
-  labs(x = "Time (s)", y = "")
-```
-
-Novelty Function {data-navmenu="First Datas"}
-====================================
-## Text {data-width="300"}
-
-### What is going on?
-Here is a novelty graph for the song '20point50'. The song actually starts around 11 seconds, the beginning is filled with "electric secrets" (their words, not mine!). This is actually very visible in the novelty graph, where at around 11 seconds there is a huge spike in novelty! After this The novelty stays pretty much constant, and in the next page ([Tempogram])we will see what the bpm is for this song.
+[Next page](#brave-captain)
 
 
-## Graph {data-width="700"}
 
-### Graph
+## Graph {data-height="700"}
+
+### Novetly function
+
 ```{r}
 twpf <-
   get_tidy_audio_analysis("1yVIMaoLkTQkqhghCiTrNy") |>
@@ -328,38 +639,244 @@ twpf |>
   labs(x = "Time (s)", y = "Novelty")
 ```
 
-Tempogram {data-navmenu="First Datas"}
-====================================
+### Keygram
 
-## Graph {data-width="700"}
-
-### Graph
 ```{r}
-tempo <- get_tidy_audio_analysis("1yVIMaoLkTQkqhghCiTrNy")
+tpf |> 
+  compmus_match_pitch_template(
+    key_templates,         # Change to chord_templates if descired
+    method = "euclidean",  # Try different distance metrics
+    norm = "manhattan"     # Try different norms
+  ) |>
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "")
+```
+
+# Brave Captain {data-navmenu="Zoom in on tracks" data-orientation="rows"}
+
+## Text {data-height="300"}
+
+### Brave Captain
+
+We take a look at this song to explore a tempogram! I had to pick this song (not from SAAN) because all the SAAN songs are based around a guitar loop.. This means that the tempo will stay exactly the same. 
+
+Brave Captain is from the Radio playlist and shows us clearly here on the left that it has two distinct parts: the part where the bpm is around 350 (which is a tempo-octave, the real tempo is around 175), and the part where we see two vague lines around 200 and 300 bpm (also octaves). 
+
+The chordogram on the right also shows us these different parts.
+
+Now we will look at the final comparisons!
+[Next page](#abc)
+
+## Graph {data-height="700"}
+
+### Tempogram
+
+```{r}
+tempo <- get_tidy_audio_analysis("3RD6AMDIgly2CO5nrqUnmc")
 
 tempo |>
-  tempogram(window_size = 8, hop_size = 3, cyclic = TRUE) |>
+  tempogram(window_size = 8, hop_size = 3, cyclic = FALSE) |>
   ggplot(aes(x = time, y = bpm, fill = power)) +
   geom_raster() +
   scale_fill_viridis_c(guide = "none") +
   labs(x = "Time (s)", y = "Tempo (BPM)") +
   theme_classic()
+
 ```
+
+### Chordogram
+
+```{r}
+circshift <- function(v, n) {
+  if (n == 0) v else c(tail(v, n), head(v, -n))
+}
+
+major_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    0,    0)
+minor_chord <-
+  c(   1,    0,    0,    1,    0,    0,    0,    1,    0,    0,    0,    0)
+seventh_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    1,    0)
+
+major_key <-
+  c(6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88)
+minor_key <-
+  c(6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17)
+
+chord_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:7", circshift(seventh_chord, 6),
+    "Gb:maj", circshift(major_chord, 6),
+    "Bb:min", circshift(minor_chord, 10),
+    "Db:maj", circshift(major_chord, 1),
+    "F:min", circshift(minor_chord, 5),
+    "Ab:7", circshift(seventh_chord, 8),
+    "Ab:maj", circshift(major_chord, 8),
+    "C:min", circshift(minor_chord, 0),
+    "Eb:7", circshift(seventh_chord, 3),
+    "Eb:maj", circshift(major_chord, 3),
+    "G:min", circshift(minor_chord, 7),
+    "Bb:7", circshift(seventh_chord, 10),
+    "Bb:maj", circshift(major_chord, 10),
+    "D:min", circshift(minor_chord, 2),
+    "F:7", circshift(seventh_chord, 5),
+    "F:maj", circshift(major_chord, 5),
+    "A:min", circshift(minor_chord, 9),
+    "C:7", circshift(seventh_chord, 0),
+    "C:maj", circshift(major_chord, 0),
+    "E:min", circshift(minor_chord, 4),
+    "G:7", circshift(seventh_chord, 7),
+    "G:maj", circshift(major_chord, 7),
+    "B:min", circshift(minor_chord, 11),
+    "D:7", circshift(seventh_chord, 2),
+    "D:maj", circshift(major_chord, 2),
+    "F#:min", circshift(minor_chord, 6),
+    "A:7", circshift(seventh_chord, 9),
+    "A:maj", circshift(major_chord, 9),
+    "C#:min", circshift(minor_chord, 1),
+    "E:7", circshift(seventh_chord, 4),
+    "E:maj", circshift(major_chord, 4),
+    "G#:min", circshift(minor_chord, 8),
+    "B:7", circshift(seventh_chord, 11),
+    "B:maj", circshift(major_chord, 11),
+    "D#:min", circshift(minor_chord, 3)
+  )
+
+key_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:maj", circshift(major_key, 6),
+    "Bb:min", circshift(minor_key, 10),
+    "Db:maj", circshift(major_key, 1),
+    "F:min", circshift(minor_key, 5),
+    "Ab:maj", circshift(major_key, 8),
+    "C:min", circshift(minor_key, 0),
+    "Eb:maj", circshift(major_key, 3),
+    "G:min", circshift(minor_key, 7),
+    "Bb:maj", circshift(major_key, 10),
+    "D:min", circshift(minor_key, 2),
+    "F:maj", circshift(major_key, 5),
+    "A:min", circshift(minor_key, 9),
+    "C:maj", circshift(major_key, 0),
+    "E:min", circshift(minor_key, 4),
+    "G:maj", circshift(major_key, 7),
+    "B:min", circshift(minor_key, 11),
+    "D:maj", circshift(major_key, 2),
+    "F#:min", circshift(minor_key, 6),
+    "A:maj", circshift(major_key, 9),
+    "C#:min", circshift(minor_key, 1),
+    "E:maj", circshift(major_key, 4),
+    "G#:min", circshift(minor_key, 8),
+    "B:maj", circshift(major_key, 11),
+    "D#:min", circshift(minor_key, 3)
+  )
+
+bc <-
+  get_tidy_audio_analysis("3RD6AMDIgly2CO5nrqUnmc") |>
+  compmus_align(sections, segments) |>
+  select(sections) |>
+  unnest(sections) |>
+  mutate(
+    pitches =
+      map(segments,
+          compmus_summarise, pitches,
+          method = "rms", norm = "euclidean"
+      )
+  )
+
+bc |> 
+  compmus_match_pitch_template(
+    key_templates,         # Change to chord_templates if descired
+    method = "euclidean",  # Try different distance metrics
+    norm = "manhattan"     # Try different norms
+  ) |>
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "")
+```
+
+# Timbre {#abc data-navmenu="Final comparison"}
 
 ## Text {data-width="300"}
 
-### BPM
-As seen before in the [Novelty Function], the tempogram also shows that the first few seconds of the song are different from the rest. After the intro the actual song starts and the tempo stays constant. All the music repetoire of SAAN is based around guitar looping, so it is no surprise to see that the tempo stays so constant, as the underlying music is quite literally repeating (they do switch sections where the tempo could change, but in this song that is not the case.) At around 100 BPM the tempogram shows the same tempo I concluded as well as the tempo spotify concluded.
+### Timbre
 
-Heatmap + dendogram {data-navmenu="First Datas" data-orientation=rows}
-====================================
+Onto the big reveal! Do SAAN and Radio SAAN have similar structures for timbre? The answer (as you could already see on the right) is yes! This is great evidence to support the statement that SAAN sounds very similar to what they have in mind, because timbre is kind of 'the sound' of a band. 
 
-## Graph {data-height="700"}
+Our final proof will be on the last page.
+[Next page](#classification)
 
-### Heatmap
+## Graph {data-width="700"}
+
+### Timbre comparisons
+
+```{r}
+SAANN <-
+  get_playlist_audio_features(
+    "",
+    "2eBYBIoOoB3AIKyGvbVo3R"
+  ) |>
+  slice(1:30) |>
+  add_audio_analysis()
+radioo <-
+  get_playlist_audio_features(
+    "",
+    "0Hq8raqKuU0Ln6Df5l2uym"
+  ) |>
+  slice(1:30) |>
+  add_audio_analysis()
+comparison <-
+  SAANN |>
+  mutate(genre = "SAAN") |>
+  bind_rows(radioo |> mutate(genre = "Radio"))
+
+comparison |>
+  mutate(
+    timbre =
+      map(
+        segments,
+        compmus_summarise,
+        timbre,
+        method = "mean"
+      )
+  ) |>
+  select(genre, timbre) |>
+  compmus_gather_timbre() |>
+  ggplot(aes(x = basis, y = value, fill = genre)) +
+  geom_violin() +
+  scale_fill_viridis_d() +
+  labs(x = "Spotify Timbre Coefficients", y = "", fill = "Playlist")
+```
+
+# Classification {#classification data-navmenu="Final comparison"}
+
+## Text {data-width="300"}
+
+### Final proof
+
+Show [Heatmap](#cl)
+
+And there is our final proof! To make this dendrogram I made an additional playlist with all the 19 SAAN songs and 19 random songs from the Radio playlist. The test was to see if the dendrogram would make a distinction between SAAN songs and non-SAAN songs. The answer is no! If you look at the [SAAN](https://open.spotify.com/playlist/2eBYBIoOoB3AIKyGvbVo3R?si=d42c6f630fb54fe1) playlist you will see that the names of the songs are not clustered in one area of the dendrogram, but rather form clusters with all the songs! If you take a look at the [heatmap](#cl) you will see the same. The song 'Tour de France' stands out the most, but if you realize that this is a Kraftwerk song it all makes sense. Except for that they compare themselves to Kraftwerk... 
+
+[Next page](#conlusion)
+
+## Graph {data-width="700"}
+
+### Dendrogram
+
 ```{r}
 saan_playlist_mix <-
-  get_playlist_audio_features("", "3nvA3PkdTXtslrzxlWF3MA") |>
+  get_playlist_audio_features("", "1PY58G38jccNBg3vx3zZMg") |>
   add_audio_analysis() |>
   mutate(
     segments = map2(segments, key, compmus_c_transpose),
@@ -396,8 +913,8 @@ halloween_juice <-
       #E + `F` + `F#|Gb` + G +
       #`G#|Ab` + A + `A#|Bb` + B +
       c01 + c02 + c03 + c04 + c05 + c06 #+
-      #c07 + c08 + c09 + c10 + c11 + c12#,
-      ,
+    #c07 + c08 + c09 + c10 + c11 + c12#,
+    ,
     data = saan_playlist_mix
   ) |>
   step_center(all_predictors()) |>
@@ -409,31 +926,58 @@ halloween_juice <-
 
 halloween_dist <- dist(halloween_juice, method = "euclidean")
 
-#halloween_dist |> 
-#  hclust(method = "complete") |> # Try single, average, and complete.
-#  dendro_data() |>
-#  ggdendrogram()
-
-heatmaply(
-  halloween_juice,
-  hclustfun = hclust,
-  hclust_method = "average",  # Change for single, average, or complete linkage.
-  dist_method = "euclidean"
-)
-```
-
-### Dendogram
-```{r}
 halloween_dist |> 
   hclust(method = "complete") |> # Try single, average, and complete.
   dendro_data() |>
   ggdendrogram()
+
+#heatmaply(
+#  halloween_juice,
+#  hclustfun = hclust,
+#  hclust_method = "average",  # Change for single, average, or complete linkage.
+#  dist_method = "euclidean"
+#)
 ```
 
-## Text {data-height="300"}
+# cl {#cl .hidden data-navmenu="Final comparison"}
 
-### Look at that!
-The dendogram speaks! The original question I had was if the SAAN songs aligned with the songs from the 'radio SAAN' playlist. Now that we have a way to see if the songs fall within a classification we can test this :). 
-For this visualisation I made a smaller playlist consisting of 6 SAAN songs and 13 other songs from the radio playlist. The six songs are: 
-20point50, Perfect Balance, Saanosphere, Words are no Use, Let it Rain, Don't Let Go. 
-As we can see in the dendogram (and the heatmap), these songs are not really put into the same categories. More like they are very spread out! I don't want to make assumptions just from this data, but it looks like the music of SAAN is quite similar (for these specific values) to the music of the playlist. 
+## Text {data-width="300"}
+
+### Final proof
+
+Show [Dendogram](#classification)
+
+And there is our final proof! To make this dendrogram I made an additional playlist with all the 19 SAAN songs and 19 random songs from the Radio playlist. The test was to see if the dendrogram would make a distinction between SAAN songs and non-SAAN songs. The answer is no! If you look at the [SAAN](https://open.spotify.com/playlist/2eBYBIoOoB3AIKyGvbVo3R?si=d42c6f630fb54fe1) playlist you will see that the names of the songs are not clustered in one area of the dendrogram, but rather form clusters with all the songs! If you take a look at the [heatmap](#cl) you will see the same. The song 'Tour de France' stands out the most, but if you realize that this is a Kraftwerk song it all makes sense. Except for that they compare themselves to Kraftwerk... 
+
+[Next page](#conclusion)
+
+## Graph {data-width="700"}
+
+### Heatmap
+
+```{r}
+heatmaply(
+  halloween_juice,
+  hclustfun = hclust,
+  hclust_method = "complete",  # Change for single, average, or complete linkage.
+  dist_method = "euclidean"
+)
+```
+
+# Conlusion 
+
+## Empty {data-width="100"}
+
+## Column {data-width="800"}
+
+### Conclusion
+
+There we have it: we have found an answer to our question! SAAN sounds a lot like thay think they do (except for Kraftwerk :) ). We explored some track-level data, went to zoom in on some specific tracks and used classification and timbral analysis to come to this conclusion. 
+
+While there is actually a lot of interesting information we found in this project, I do want to add that this is far from perfect. There are a lot more questions to be asked and a lot more answers to be found. We could for example look at all the tempograms for the SAAN songs to see if they actually stay in perfect time, or we could try classifying on different features to see if there actually is a hidden cluster somewhere. Maybe I will pursue these questions in the future! 
+
+Another shortcoming of this data is that the SAAN playlist has 19 songs in it, while the Radio playlist has 88 songs in it. This is quite a big difference and might have lead to some misinterpretations or  faulty representation. If SAAN releases some more music in the future, we will re-run the calculations to see if it changes anything! 
+
+For now, I hope you enjoyed and maybe learned something new. I know I did!
+
+## Empty {data-width="100"}
